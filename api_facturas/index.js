@@ -13,7 +13,7 @@ app.use('/api/v1/Facturas', FacturasRoutes)
 app.use('/api/v1/products', productRoutes)
 
 app.get('/', (req, res) => {
-    res.send({ message: 'Funca' })
+    res.send({ message: 'Bienvenido a la API de Facturas Electronica y Control de Ventas ' })
 })
 
 const PORT = process.env.PORT || 3000
