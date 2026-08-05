@@ -1,5 +1,5 @@
 
-import { jsonResponse } from '../helpers/json_response.js'
+import { jsonResponse } from '../helpers/jsonResponse.js'
 
 
 export const createFactura = async (req, res) => {
