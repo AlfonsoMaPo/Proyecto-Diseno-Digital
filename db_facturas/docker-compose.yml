@@ -1,0 +1,21 @@
+
+services:
+  db_facturaproyecto_unah:
+    image: mysql:8.0
+    container_name: facturaproyecto_unah
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: facturaproyecto_unah
+      MYSQL_USER: unah
+      MYSQL_PASSWORD: unah2026
+    ports:
+      # Expone el puerto 3308 en tu máquina hacia el 3306 del contenedor
+      - "3308:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  db_data:
