@@ -2,7 +2,7 @@ import { pool } from '../db/db.js'
 
 export default class FacturaModel {
 
-    static createFactura = async ({ userid, customername, rtn_id, items }) => {
+    static createFactura = async ({ user_id, customer_name, customer_rtn_id, items }) => {
         const conn = await pool.getConnection()
 
         try {
@@ -55,7 +55,7 @@ export default class FacturaModel {
             const [invoiceResult] = await conn.execute(
                 `INSERT INTO invoices (invoice_number, user_id, customer_name, customer_rtn_id, subtotal, tax, total)
                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [invoice_number, userid, customername, rtn_id ?? 'CONSUMIDOR FINAL', subtotal.toFixed(2), tax, total]
+                [invoice_number, user_id, customer_name, customer_rtn_id ?? 'CONSUMIDOR FINAL', subtotal.toFixed(2), tax, total]
             )
 
             const invoice_id = invoiceResult.insertId
@@ -77,7 +77,7 @@ export default class FacturaModel {
 
             await conn.commit()
 
-            return await FacturaModel.findById(invoice_id)
+            return await FacturaModel.getFacturaById(invoice_id)
 
         } catch (e) {
             await conn.rollback()
@@ -86,7 +86,7 @@ export default class FacturaModel {
     }
 
     // Listado de facturas 
-    static getAll = async (userid = null, role = null) => {
+    static getAllFacturas = async (user_id = null, role = null) => {
         try {
 
             await using conn = await pool.getConnection()
@@ -106,13 +106,14 @@ export default class FacturaModel {
                     u.email AS cashier_email
                 FROM invoices i
                 INNER JOIN users u ON i.user_id = u.id
+                WHERE i.status != 'VOIDED'
             `
 
             const params = []
 
             if (role === 'CASHIER') {
                 query += ` WHERE i.user_id = ?`
-                params.push(userid)
+                params.push(user_id)
             }
 
             query += ` ORDER BY i.created_at DESC`
@@ -124,7 +125,7 @@ export default class FacturaModel {
         }
     }
 
-    static findById = async (id) => {
+    static getFacturaById = async (id) => {
         try {
 
             await using conn = await pool.getConnection()
@@ -218,7 +219,7 @@ export default class FacturaModel {
 
             await conn.commit()
 
-            return await InvoiceModel.findById(id)
+            return await FacturaModel.getFacturaById(id)
 
         } catch (e) {
 

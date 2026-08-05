@@ -5,7 +5,7 @@ import FacturaModel from '../models/facturaModel.js'
 
 
 export const createFactura = async (req, res) => {
-    
+
     const payload = req.body
 
     const { success, data, error } = validateFactura(payload)
@@ -21,7 +21,7 @@ export const createFactura = async (req, res) => {
     try {
 
         // el usuario que emite la factura es el que está autenticado
-        const result = await FacturaModel.create({
+        const result = await FacturaModel.createFactura({
             user_id: req.user.id,
             customer_name: data.customer_name,
             customer_rtn_id: data.customer_rtn_id,
@@ -49,10 +49,10 @@ export const createFactura = async (req, res) => {
 
 
 export const getAllFacturas = async (req, res) => {
-    
+
     try {
 
-        const facturas = await FacturaModel.getAll(req.user.id, req.user.role)
+        const facturas = await FacturaModel.getAllFacturas(req.user.id, req.user.role)
         res.json(jsonResponse({ message: 'Listado de facturas', data: facturas }))
 
     } catch (e) {
@@ -67,7 +67,7 @@ export const getFacturaById = async (req, res) => {
 
     try {
 
-        const factura = await FacturaModel.findById(id)
+        const factura = await FacturaModel.getFacturaById(id)
 
         if (!factura) {
             return res.status(404).json(jsonResponse({
