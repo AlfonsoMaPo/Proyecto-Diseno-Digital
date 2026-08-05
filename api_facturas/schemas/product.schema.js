@@ -6,7 +6,7 @@ const productSchema = z.object({
     name: z.string().min(2, 'El nombre debe tener mínimo 2 caracteres').max(100),
     price: z.number().positive('El precio debe ser un número positivo'),
     stock: z.number().int().min(0, 'El stock no puede ser negativo')
-})
+}).strict()
 
 // schema parcial para actualizar stock (solo stock_to_add)
 const stockSchema = z.object({

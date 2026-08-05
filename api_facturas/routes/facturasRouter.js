@@ -1,19 +1,21 @@
 
 import { Router } from 'express'
 import { createFactura, getAllFacturas, getFacturaById, voidFactura } from '../controllers/facturasController.js'
+import { isAuth } from '../middlewares/isAuth.js'
+
 
 const FacturaRoutes = Router()
 
 // crear factura 
-FacturaRoutes.post('/', createFactura)
+FacturaRoutes.post('/', isAuth, createFactura)
 
 // listado de facturas 
-FacturaRoutes.get('/', getAllFacturas)
+FacturaRoutes.get('/', isAuth, getAllFacturas)
 
 // detalle de una factura 
-FacturaRoutes.get('/:id', getFacturaById)
+FacturaRoutes.get('/:id', isAuth, getFacturaById)
 
 // Anular factura 
-FacturaRoutes.patch('/:id/void', voidFactura)
+FacturaRoutes.patch('/:id/void', isAuth, voidFactura)
 
 export default FacturaRoutes

@@ -7,9 +7,9 @@ const productRoutes = Router()
 productRoutes.get('/', getAllProducts)
 
 // POST /api/v1/products — crear producto
-productRoutes.post('/', createProduct)
+productRoutes.post('/', isAuth, createProduct)
 
 // PATCH /api/v1/products/:id/stock — aumentar stock
-productRoutes.patch('/:id/stock', addStock)
+productRoutes.patch('/:id/stock', isAuth, addStock)
 
 export default productRoutes
