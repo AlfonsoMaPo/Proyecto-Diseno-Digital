@@ -1,11 +1,10 @@
 
 import jwt from 'jsonwebtoken'
-import { jsonResponse } from '../helpers/json_response.js'
+import { jsonResponse } from '../helpers/jsonResponse.js'
 
 
 export const isAuth = async (req, res, next) => {
 
-    // capturar la req y obtener los encabezados
     const authHeader = req.headers.authorization
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -18,11 +17,10 @@ export const isAuth = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1]
 
-    // validar el token
     try {
-        const { id, email, role } = jwt.verify(token, process.env.JWT_KEY)
+        const jwtSecret = process.env.JWT_KEY || 'secret_key_123'
+        const { id, email, role } = jwt.verify(token, jwtSecret)
 
-        // sacar datos del token
         req.user = { id, email, role }
 
         next()
