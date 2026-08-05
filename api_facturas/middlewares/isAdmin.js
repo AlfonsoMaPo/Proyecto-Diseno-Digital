@@ -1,5 +1,5 @@
 
-import { jsonResponse } from '../helpers/json_response.js'
+import { jsonResponse } from '../helpers/jsonResponse.js'
 
 // verifica que tenga el rol ADMIN
 export const isAdmin = (req, res, next) => {
