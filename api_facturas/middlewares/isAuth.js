@@ -1,10 +1,7 @@
-
 import jwt from 'jsonwebtoken'
 import { jsonResponse } from '../helpers/jsonResponse.js'
 
-
 export const isAuth = async (req, res, next) => {
-
     const authHeader = req.headers.authorization
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

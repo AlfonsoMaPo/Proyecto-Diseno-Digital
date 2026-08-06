@@ -1,13 +1,9 @@
-
 import { jsonResponse } from '../helpers/jsonResponse.js'
 import { validateFactura } from '../schemas/factura.schema.js'
 import FacturaModel from '../models/facturaModel.js'
 
-
 export const createFactura = async (req, res) => {
-
     const payload = req.body
-
     const { success, data, error } = validateFactura(payload)
 
     if (!success) {
@@ -19,8 +15,6 @@ export const createFactura = async (req, res) => {
     }
 
     try {
-
-        // el usuario que emite la factura es el que está autenticado
         const result = await FacturaModel.createFactura({
             user_id: req.user.id,
             customer_name: data.customer_name,
@@ -28,7 +22,6 @@ export const createFactura = async (req, res) => {
             items: data.items
         })
 
-        // si el modelo retorna un error 
         if (result?.error) {
             return res.status(result.status).json(jsonResponse({
                 status: result.status,
@@ -47,26 +40,19 @@ export const createFactura = async (req, res) => {
     }
 }
 
-
 export const getAllFacturas = async (req, res) => {
-
     try {
-
         const facturas = await FacturaModel.getAllFacturas(req.user.id, req.user.role)
         res.json(jsonResponse({ message: 'Listado de facturas', data: facturas }))
-
     } catch (e) {
         res.status(500).json(jsonResponse({ status: 500, message: e.message, data: null }))
     }
 }
 
-
 export const getFacturaById = async (req, res) => {
-
     const { id } = req.params
 
     try {
-
         const factura = await FacturaModel.getFacturaById(id)
 
         if (!factura) {
@@ -83,16 +69,12 @@ export const getFacturaById = async (req, res) => {
     }
 }
 
-// anular factura
 export const voidFactura = async (req, res) => {
-    
     const { id } = req.params
 
     try {
-
         const result = await FacturaModel.voidFactura(Number(id))
 
-        // si el modelo retorna un error
         if (result?.error) {
             return res.status(result.status).json(jsonResponse({
                 status: result.status,

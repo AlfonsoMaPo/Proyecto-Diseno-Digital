@@ -40,7 +40,6 @@ export const login = async (req, res) => {
 
         const jwtSecret = process.env.JWT_KEY || 'secret_key_123'
 
-        // Payload según especificación de proyecto2.md: { id, email, role }
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             jwtSecret,

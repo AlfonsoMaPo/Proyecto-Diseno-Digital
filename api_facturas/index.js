@@ -10,10 +10,11 @@ app.use(express.json())
 
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/Facturas', FacturasRoutes)
+app.use('/api/v1/invoices', FacturasRoutes)
 app.use('/api/v1/products', productRoutes)
 
 app.get('/', (req, res) => {
-    res.send({ message: 'Bienvenido a la API de Facturas Electronica y Control de Ventas ' })
+    res.send({ message: 'Bienvenido a la API de Facturas Electronica y Control de Ventas' })
 })
 
 const PORT = process.env.PORT || 3000

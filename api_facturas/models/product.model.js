@@ -1,9 +1,7 @@
 import { pool } from '../db/db.js'
 
-// modelo de productos — clase estática igual que MovieModel en la referencia
 export default class ProductModel {
 
-    // listar todos los productos activos del catálogo
     static getAllActive = async () => {
         let conn
         try {
@@ -24,7 +22,6 @@ export default class ProductModel {
         }
     }
 
-    // obtener un producto por ID (usado internamente para validaciones)
     static findById = async (id) => {
         let conn
         try {
@@ -43,7 +40,6 @@ export default class ProductModel {
         }
     }
 
-    // crear un nuevo producto en el catálogo
     static create = async ({ code, name, price, stock }) => {
         let conn
         try {
@@ -67,7 +63,6 @@ export default class ProductModel {
         }
     }
 
-    // incrementar el stock de un producto existente
     static addStock = async (id, stock_to_add) => {
         let conn
         try {

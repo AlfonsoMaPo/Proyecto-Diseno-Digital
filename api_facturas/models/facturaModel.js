@@ -6,10 +6,8 @@ export default class FacturaModel {
         const conn = await pool.getConnection()
 
         try {
-
             await conn.beginTransaction()
 
-            // Validar stock
             for (const item of items) {
                 const [rows] = await conn.execute(
                     `SELECT id, name, price, stock FROM products WHERE id = ? AND is_active = TRUE FOR UPDATE`,
@@ -18,7 +16,6 @@ export default class FacturaModel {
 
                 if (rows.length === 0) {
                     await conn.rollback()
-
                     return {
                         error: true,
                         status: 400,
@@ -41,17 +38,14 @@ export default class FacturaModel {
                 item.name = product.name
             }
 
-            // Calcular totales 
             const subtotal = items.reduce((acc, item) => acc + (item.unit_price * item.quantity), 0)
             const tax = parseFloat((subtotal * 0.15).toFixed(2))
             const total = parseFloat((subtotal + tax).toFixed(2))
 
-            // Generar número de factura
             const timestamp = Date.now()
             const random = Math.floor(1000 + Math.random() * 9000)
             const invoice_number = `FAC-${timestamp}-${random}`
 
-            // Encabezado de la factura
             const [invoiceResult] = await conn.execute(
                 `INSERT INTO invoices (invoice_number, user_id, customer_name, customer_rtn_id, subtotal, tax, total)
                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -60,9 +54,7 @@ export default class FacturaModel {
 
             const invoice_id = invoiceResult.insertId
 
-            // Bajar el stock
             for (const item of items) {
-
                 await conn.execute(
                     `INSERT INTO invoice_details (invoice_id, product_id, quantity, unit_price, subtotal)
                      VALUES (?, ?, ?, ?, ?)`,
@@ -82,16 +74,16 @@ export default class FacturaModel {
         } catch (e) {
             await conn.rollback()
             throw e
-        } 
+        } finally {
+            if (conn) conn.release()
+        }
     }
 
-    // Listado de facturas 
     static getAllFacturas = async (user_id = null, role = null) => {
+        let conn
         try {
+            conn = await pool.getConnection()
 
-            await using conn = await pool.getConnection()
-
-            //si es Cashier solo mostrara las suyas
             let query = `SELECT
                     i.id,
                     i.invoice_number,
@@ -106,13 +98,12 @@ export default class FacturaModel {
                     u.email AS cashier_email
                 FROM invoices i
                 INNER JOIN users u ON i.user_id = u.id
-                WHERE i.status != 'VOIDED'
             `
 
             const params = []
 
             if (role === 'CASHIER') {
-                query += ` WHERE i.user_id = ?`
+                query += ` WHERE i.status != 'VOIDED' AND i.user_id = ?`
                 params.push(user_id)
             }
 
@@ -122,14 +113,16 @@ export default class FacturaModel {
             return rows
         } catch (e) {
             throw e
+        } finally {
+            if (conn) conn.release()
         }
     }
 
     static getFacturaById = async (id) => {
+        let conn
         try {
+            conn = await pool.getConnection()
 
-            await using conn = await pool.getConnection()
-            //  encabezado
             const [invoiceRows] = await conn.execute(
                 `SELECT
                     i.id,
@@ -145,11 +138,11 @@ export default class FacturaModel {
                     u.email AS cashier_email
                 FROM invoices i
                 INNER JOIN users u ON i.user_id = u.id
-                WHERE i.id = ?`,[id]
+                WHERE i.id = ?`, [id]
             )
 
             if (invoiceRows.length === 0) return null
-            //  detalle
+
             const [detailRows] = await conn.execute(
                 `SELECT
                     d.id,
@@ -171,17 +164,17 @@ export default class FacturaModel {
             }
         } catch (e) {
             throw e
+        } finally {
+            if (conn) conn.release()
         }
     }
 
-    // anular factura
     static voidFactura = async (id) => {
-
         const conn = await pool.getConnection()
 
         try {
             await conn.beginTransaction()
-            // buscar q exista
+
             const [invoiceRows] = await conn.execute(
                 `SELECT id, status FROM invoices WHERE id = ? FOR UPDATE`,
                 [id]
@@ -197,13 +190,11 @@ export default class FacturaModel {
                 return { error: true, status: 400, message: 'La factura ya fue anulada anteriormente' }
             }
 
-            // detalle para restituir stock
             const [detailRows] = await conn.execute(
                 `SELECT product_id, quantity FROM invoice_details WHERE invoice_id = ?`,
                 [id]
             )
 
-            // restitucion de stock
             for (const detail of detailRows) {
                 await conn.execute(
                     `UPDATE products SET stock = stock + ? WHERE id = ?`,
@@ -211,7 +202,6 @@ export default class FacturaModel {
                 )
             }
 
-            // cambiar a VOIDED
             await conn.execute(
                 `UPDATE invoices SET status = 'VOIDED' WHERE id = ?`,
                 [id]
@@ -222,9 +212,10 @@ export default class FacturaModel {
             return await FacturaModel.getFacturaById(id)
 
         } catch (e) {
-
             await conn.rollback()
             throw e
-        } 
+        } finally {
+            if (conn) conn.release()
+        }
     }
 }

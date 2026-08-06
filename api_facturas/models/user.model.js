@@ -2,7 +2,6 @@ import { pool } from '../db/db.js'
 
 export default class UserModel {
 
-    // Buscar un usuario por su email
     static findByEmail = async (email) => {
         let conn
         try {
@@ -21,7 +20,6 @@ export default class UserModel {
         }
     }
 
-    // Buscar un usuario por su ID
     static findById = async (id) => {
         let conn
         try {
